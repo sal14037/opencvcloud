@@ -1,0 +1,2 @@
+# opencvcloud
+OpenCV, HIPI, Hadoop
