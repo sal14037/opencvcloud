@@ -2,7 +2,9 @@ import hipi.image.FloatImage;
 import hipi.image.ImageHeader;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -34,7 +36,7 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.HOGDescriptor;
 
 public class OCVCMapper extends
-		Mapper<ImageHeader, FloatImage, Text, IntWritable> {
+		Mapper<ImageHeader, FloatImage, IntWritable, Text> {
 
 	public Path path;
 	public FileSystem fileSystem;
@@ -70,6 +72,7 @@ public class OCVCMapper extends
 
 		// Init Face recognition
 		FaceRecognition fr = new FaceRecognition();
+		Mat face = new Mat();
 
 		if (!cv.empty()) {
 			p.detectPeople(cv);
@@ -106,8 +109,11 @@ public class OCVCMapper extends
 							fd.detectFace(mGrey);
 							if (!fd.faces.empty()) {
 								for (Rect rect1 : fd.faces.toArray()) {
-									// draw rectangle plus text
+									face = Utils.cropMatrix(mGrey, rect1);
+									fr.loadRecogniser();
+									fr.recognise(face);
 									if (fr.getLabel() > 0) {
+										// draw rectangle plus text
 										Imgproc.putText(cv,
 												"Person " + fr.getLabel(),
 												new Point(rect.x + rect1.x,
@@ -143,7 +149,7 @@ public class OCVCMapper extends
 							Imgproc.rectangle(cv, rectPoint1, rectPoint2,
 									p.rectColor, 2);
 							Imgproc.putText(cv, String.format("%1.2f", p
-									.getWeightList().get(i++)), fontPoint,
+									.getWeightList().get(i)), fontPoint,
 									Core.FONT_HERSHEY_PLAIN, 1.5, p.rectColor,
 									2, Core.LINE_AA, false);
 						}
@@ -158,6 +164,9 @@ public class OCVCMapper extends
 					fd.detectFace(mGrey);
 					if (fd.faces.rows() > 0) {
 						for (Rect rect1 : fd.faces.toArray()) {
+							face = Utils.cropMatrix(mGrey, rect1);
+							fr.loadRecogniser();
+							fr.recognise(face);
 							Imgproc.rectangle(cv, new Point(rect1.x, rect1.y),
 									new Point(rect1.x + rect1.width, rect1.y
 											+ rect1.height), new Scalar(0, 255,
@@ -176,6 +185,9 @@ public class OCVCMapper extends
 				fd.detectFace(mGrey);
 				if (fd.faces.rows() > 0) {
 					for (Rect rect1 : fd.faces.toArray()) {
+						face = Utils.cropMatrix(mGrey, rect1);
+						fr.loadRecogniser();
+						fr.recognise(face);
 						Imgproc.rectangle(cv, new Point(rect1.x, rect1.y),
 								new Point(rect1.x + rect1.width, rect1.y
 										+ rect1.height),
@@ -200,6 +212,12 @@ public class OCVCMapper extends
 			os.flush();
 			os.close();
 		}
-		context.write(new Text(value.hex()), new IntWritable(framesWithPeople));
+		key.addEXIFInformation("Date", new Date().toLocaleString());
+		Random r = new Random();
+		key.addEXIFInformation("Capture device", "Camera" + r.nextInt(10));
+		String date = key.getEXIFInformation("Date");
+		String camera = key.getEXIFInformation("Capture device");
+		context.write(new IntWritable(1), new Text(value.hex() + " " + camera
+				+ " " + date + " " + fr.getLabel()));
 	}
 }

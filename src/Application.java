@@ -1,5 +1,6 @@
 import hipi.imagebundle.mapreduce.ImageBundleInputFormat;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -37,8 +38,8 @@ public class Application extends Configured implements Tool {
 		job.setReducerClass(OCVCReducer.class);
 		// Set the types for the key/value pairs passed to/from map and reduce
 		// layers
-		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(IntWritable.class);
+		job.setMapOutputKeyClass(IntWritable.class);
+		job.setMapOutputValueClass(Text.class);
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 

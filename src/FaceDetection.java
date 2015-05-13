@@ -10,7 +10,9 @@ public class FaceDetection {
 
 	MatOfRect faces = new MatOfRect();
 	CascadeClassifier face_cascade = new CascadeClassifier(
-			"input/haarcascade_frontalface_alt.xml");
+			"/home/thomas/opencv/opencv3/data/haarcascades/haarcascade_frontalface_default.xml");
+
+	// /home/thomas/opencv/opencv3/data/haarcascades/haarcascade_frontalface_alt.xml
 
 	public Mat detectFace(Mat m) {
 		face_cascade.detectMultiScale(m, faces);
