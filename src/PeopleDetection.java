@@ -41,6 +41,7 @@ public class PeopleDetection {
 		m.convertTo(m, CvType.CV_8UC3);
 		hog.setSVMDetector(descriptors);
 		hog.detectMultiScale(m, foundLocations, foundWeights);
+		//store found locations and weights in lists
 		weightList = getFoundWeights().toList();
 		rectList = getFoundLocations().toList();
 		return m;
@@ -77,6 +78,7 @@ public class PeopleDetection {
 		return numberOfPeople;
 	}
 
+	// check if all the people are wrong detections < treshold
 	public boolean allIsLost() {
 		for (Double d : foundWeights.toList()) {
 			if (d >= threshold) {
@@ -87,6 +89,7 @@ public class PeopleDetection {
 		return allwrong;
 	}
 
+	//check if within threshold
 	public boolean withinThreshold(int index) {
 		if (foundWeights.toList().get(index).doubleValue() < threshold)
 			return false;

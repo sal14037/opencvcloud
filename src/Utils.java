@@ -1,10 +1,13 @@
 import hipi.image.FloatImage;
 
 import org.apache.log4j.Logger;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -12,6 +15,8 @@ public class Utils {
 
 	public static Logger l = Logger.getLogger(OCVCMapper.class);
 
+	
+	// convert floatImage to OpenCV Mat
 	public static Mat floatImgToMat(FloatImage value) {
 		float[] f = value.getData();
 		int w = value.getWidth();
@@ -33,6 +38,7 @@ public class Utils {
 		return m;
 	}
 
+	// convert OpenCV Mat to byte array
 	public static byte[] matToByteArr(Mat m) {
 		MatOfByte buf = new MatOfByte();
 		Imgcodecs.imencode(".jpg", m, buf);
@@ -41,6 +47,7 @@ public class Utils {
 		return b;
 	}
 
+	// crop the input matrix to specified rect
 	public static Mat cropMatrix(Mat input, Rect rect) {
 		Mat output = new Mat();
 		// check if the position is within the image
@@ -61,5 +68,16 @@ public class Utils {
 			}
 		}
 		return output;
+	}
+	
+	// draw a rectangle
+	public static void drawRect(Mat mat, Point p1, Point p2, Scalar colour) {
+		Imgproc.rectangle(mat, p1, p2, colour, 2);
+	}
+
+	//draw the text
+	public static void drawText(Mat mat, String text, Point p1, Scalar colour) {
+		Imgproc.putText(mat, text, p1, Core.FONT_HERSHEY_PLAIN, 1, colour, 2,
+				Core.LINE_AA, false);
 	}
 }
